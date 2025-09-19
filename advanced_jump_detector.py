@@ -69,7 +69,7 @@ class AdvancedJumpDetector:
     def init_mongodb(self):
         """Initialize MongoDB connection"""
         try:
-            self.mongo_client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/', serverSelectionTimeoutMS=5000)
+            self.mongo_client = MongoClient('mongodb+srv://deepfit:deepfit@cluster0.81dgp52.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', serverSelectionTimeoutMS=5000)
             self.mongo_client.admin.command('ping')
             self.mongo_db = self.mongo_client['sih2573']
             self.mongo_collection = self.mongo_db['Vertical_Jump']

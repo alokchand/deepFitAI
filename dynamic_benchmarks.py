@@ -4,7 +4,7 @@ from pymongo import MongoClient
 from datetime import datetime
 
 class DynamicBenchmarkSystem:
-    def __init__(self, mongo_uri="mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/", db_name="sih2573"):
+    def __init__(self, mongo_uri="mongodb+srv://deepfit:deepfit@cluster0.81dgp52.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0", db_name="sih2573"):
         self.client = MongoClient(mongo_uri)
         self.db = self.client[db_name]
         self.athlete_data = self.load_athlete_data()

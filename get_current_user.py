@@ -12,7 +12,7 @@ def get_current_user_email():
     """Get current user email from Flask session or MongoDB"""
     try:
         # Connect to MongoDB
-        client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/')
+        client = MongoClient('mongodb+srv://deepfit:deepfit@cluster0.81dgp52.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
         db = client['sih2573']
         users = db['users']
         

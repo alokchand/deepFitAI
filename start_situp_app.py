@@ -13,7 +13,7 @@ def check_mongodb():
     """Check if MongoDB is running"""
     try:
         from pymongo import MongoClient
-        client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/', serverSelectionTimeoutMS=2000)
+        client = MongoClient('mongodb+srv://deepfit:deepfit@cluster0.81dgp52.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', serverSelectionTimeoutMS=2000)
         client.server_info()
         print("✓ MongoDB is running")
         return True

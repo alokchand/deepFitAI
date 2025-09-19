@@ -78,7 +78,7 @@ class MongoDBManager:
     
     def __init__(self):
         try:
-            self.client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/')
+            self.client = MongoClient('mongodb+srv://deepfit:deepfit@cluster0.81dgp52.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
             self.db = self.client['sih2573']
             self.users = self.db['users']
             self.height_weight_collection = self.db['Height and Weight']

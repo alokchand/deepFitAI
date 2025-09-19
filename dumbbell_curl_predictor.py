@@ -276,7 +276,7 @@ data = {
 
 # Insert to MongoDB
 try:
-    client = MongoClient("mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/")
+    client = MongoClient("mongodb+srv://deepfit:deepfit@cluster0.81dgp52.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0")
     db = client["sih2573"]
     collection = db["DumbBell"]
     result = collection.insert_one(data)

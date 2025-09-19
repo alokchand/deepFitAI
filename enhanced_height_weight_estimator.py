@@ -52,7 +52,7 @@ def _initialize_models(self):
                                                         cv2.destroyAllWindows()
                                                         self.cleanup()  # Call cleanup method                                                        def get_db_connection():
                                                             try:
-                                                                client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/', 
+                                                                client = MongoClient('mongodb+srv://deepfit:deepfit@cluster0.81dgp52.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', 
                                                                                    serverSelectionTimeoutMS=5000,  # 5 second timeout
                                                                                    connectTimeoutMS=5000)
                                                                 client.server_info()  # Test connection
@@ -75,7 +75,7 @@ def _initialize_models(self):
                                                                     client.close()
                                                             return wrapper                                                            def get_db_connection():
                                                                 try:
-                                                                    client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/', 
+                                                                    client = MongoClient('mongodb+srv://deepfit:deepfit@cluster0.81dgp52.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0', 
                                                                                        serverSelectionTimeoutMS=5000,  # 5 second timeout
                                                                                        connectTimeoutMS=5000)
                                                                     client.server_info()  # Test connection
