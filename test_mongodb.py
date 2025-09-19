@@ -3,7 +3,7 @@ from datetime import datetime
 
 # Test MongoDB connection
 try:
-    client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=5000)
+    client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/', serverSelectionTimeoutMS=5000)
     client.admin.command('ping')
     print("✅ MongoDB connection successful")
     

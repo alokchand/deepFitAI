@@ -32,7 +32,7 @@ def dashboard():
     try:
         # Direct MongoDB connection
         from pymongo import MongoClient
-        client = MongoClient("mongodb://localhost:27017/")
+        client = MongoClient("mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/")
         db_conn = client["sih2573"]
         
         print(f"Looking for user with ID: {session['user_id']}")  # Debug
@@ -233,7 +233,7 @@ mongodb_connected = db is not None
 
 # Initialize dynamic benchmark system
 benchmark_system = DynamicBenchmarkSystem(
-    mongo_uri="mongodb://localhost:27017/", 
+    mongo_uri="mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/", 
     db_name="sih2573"
 )
 

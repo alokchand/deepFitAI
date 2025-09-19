@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 
 # Connect to MongoDB
-client = MongoClient("mongodb://localhost:27017/")
+client = MongoClient("mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/")
 db = client["sih2573"]
 
 # Check user data

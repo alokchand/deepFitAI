@@ -31,7 +31,7 @@ app.secret_key = 'your-secret-key-here'  # Change this to a secure secret key
 
 # MongoDB setup
 try:
-    client = MongoClient('mongodb://localhost:27017/')
+    client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/')
     db = client['sih2573']
     users = db['users']
     # Test connection

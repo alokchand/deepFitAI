@@ -12,7 +12,7 @@ import json
 class EstimationFixer:
     def __init__(self):
         try:
-            self.client = MongoClient('mongodb://localhost:27017/')
+            self.client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/')
             self.db = self.client['sih2573']
             self.height_weight_collection = self.db['Height and Weight']
             self.final_estimates_collection = self.db['Final_Estimated_Height_and_Weight']

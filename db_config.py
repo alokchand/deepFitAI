@@ -14,7 +14,7 @@ def connect_mongodb(max_retries=3, retry_delay=2):
     """
     for attempt in range(max_retries):
         try:
-            client = MongoClient('mongodb://localhost:27017/',
+            client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/',
                                serverSelectionTimeoutMS=5000,
                                connectTimeoutMS=5000)
             

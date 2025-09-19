@@ -34,7 +34,7 @@ The `integrated_system.py` has been refactored to eliminate direct user input pr
 ```python
 class MongoDBManager:
     def __init__(self):
-        self.client = MongoClient('mongodb://localhost:27017/')
+        self.client = MongoClient('mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/')
         self.db = self.client['sih2573']
         self.users = self.db['users']
     
@@ -149,7 +149,7 @@ The system expects users in MongoDB with this structure:
 ## Configuration
 
 ### MongoDB Connection
-Default connection: `mongodb://localhost:27017/`
+Default connection: `mongodb+srv://alokchandm19_db_user:eYfJjjAy0i4mNqQg@cluster0.81dgp52.mongodb.net/`
 Database: `sih2573`
 Collection: `users`
 
