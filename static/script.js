@@ -94,8 +94,14 @@ class SitupsTracker {
             this.stopBtn.disabled = false;
             
             this.startTimer();
-            this.startClientStatsUpdate();
+            this.startStatsUpdate(); // Use regular stats update
             this.showFeedback('Client camera started! Begin your situps.', 'success');
+            
+            // Start server-side session for exercise detection
+            await fetch('/situp/new_session');
+            
+            // Send video frames to server for processing
+            this.startFrameCapture(video);
             
         } catch (error) {
             this.showFeedback('Camera access denied: ' + error.message, 'error');
@@ -192,23 +198,38 @@ class SitupsTracker {
         }, 500);
     }
 
-    startClientStatsUpdate() {
-        // Mock stats for client-side camera
-        let reps = 0;
-        this.statsInterval = setInterval(() => {
-            if (this.isRunning) {
-                // Simulate rep counting (for demo)
-                if (Math.random() < 0.02) { // 2% chance per update
-                    reps++;
-                }
-                
-                this.updateStats({
-                    reps: reps,
-                    feedback: reps > 0 ? `Rep ${reps}! Keep going!` : 'Get Ready',
-                    form_percentage: Math.min(85, 60 + reps * 2)
-                });
+    startFrameCapture(video) {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 640;
+        canvas.height = 480;
+        
+        const captureFrame = () => {
+            if (this.isRunning && video.readyState === video.HAVE_ENOUGH_DATA) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                canvas.toBlob(async (blob) => {
+                    if (blob) {
+                        const formData = new FormData();
+                        formData.append('frame', blob, 'frame.jpg');
+                        
+                        try {
+                            await fetch('/situp/process_frame', {
+                                method: 'POST',
+                                body: formData
+                            });
+                        } catch (error) {
+                            console.error('Frame processing error:', error);
+                        }
+                    }
+                }, 'image/jpeg', 0.8);
             }
-        }, 500);
+            
+            if (this.isRunning) {
+                setTimeout(captureFrame, 100); // 10 FPS
+            }
+        };
+        
+        captureFrame();
     }
 
     stopStatsUpdate() {

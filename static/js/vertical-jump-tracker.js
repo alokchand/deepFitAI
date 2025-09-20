@@ -193,24 +193,16 @@ class VerticalJumpTracker {
     }
 
     startClientStatsUpdate() {
-        let jumps = 0;
-        let maxHeight = 0;
-        this.statsInterval = setInterval(() => {
+        // Use server-side stats even with client camera
+        this.statsInterval = setInterval(async () => {
             if (this.isRunning) {
-                if (Math.random() < 0.01) {
-                    jumps++;
-                    const height = Math.random() * 50 + 20;
-                    if (height > maxHeight) maxHeight = height;
+                try {
+                    const response = await fetch('/vertical_jump/get_stats');
+                    const stats = await response.json();
+                    this.updateStats(stats);
+                } catch (error) {
+                    console.error('Error fetching stats:', error);
                 }
-                
-                this.updateStats({
-                    total_jumps: jumps,
-                    max_height: maxHeight.toFixed(1),
-                    current_height: (Math.random() * 10).toFixed(1),
-                    state: jumps > 0 ? 'ACTIVE' : 'GROUND',
-                    calibrated: true,
-                    feedback: jumps > 0 ? `Jump ${jumps} completed!` : 'Ready to jump'
-                });
             }
         }, 500);
     }

@@ -194,20 +194,16 @@ class DumbbellTracker {
     }
 
     startClientStatsUpdate() {
-        let leftReps = 0, rightReps = 0;
-        this.statsInterval = setInterval(() => {
+        // Use server-side stats even with client camera
+        this.statsInterval = setInterval(async () => {
             if (this.isRunning) {
-                if (Math.random() < 0.015) leftReps++;
-                if (Math.random() < 0.015) rightReps++;
-                
-                this.updateStats({
-                    left_reps: leftReps,
-                    right_reps: rightReps,
-                    total_reps: leftReps + rightReps,
-                    estimated_weight: Math.min(25, 10 + (leftReps + rightReps) * 0.5),
-                    left_status: leftReps > 0 ? `L: Active (${leftReps})` : 'L: Ready',
-                    right_status: rightReps > 0 ? `R: Active (${rightReps})` : 'R: Ready'
-                });
+                try {
+                    const response = await fetch('/dumbbell/get_stats');
+                    const stats = await response.json();
+                    this.updateStats(stats);
+                } catch (error) {
+                    console.error('Error fetching stats:', error);
+                }
             }
         }, 500);
     }

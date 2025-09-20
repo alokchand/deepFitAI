@@ -13,6 +13,8 @@ from datetime import datetime
 from pathlib import Path
 from bson import ObjectId
 from db_config import get_db
+from PIL import Image
+import io
 
 # Create blueprint with template and static folders
 situp_bp = Blueprint('situp', __name__,
@@ -537,3 +539,33 @@ def cleanup():
         return '', 204  # No content response for beacon
     except Exception:
         return '', 204  # Always return success for cleanup
+
+@situp_bp.route('/process_frame', methods=['POST'])
+def process_frame():
+    """Process frame from client camera"""
+    global session_active
+    
+    try:
+        if not session_active:
+            return jsonify({'status': 'error', 'message': 'No active session'})
+        
+        if 'frame' not in request.files:
+            return jsonify({'status': 'error', 'message': 'No frame provided'})
+        
+        frame_file = request.files['frame']
+        
+        # Convert uploaded image to OpenCV format
+        import numpy as np
+        from PIL import Image
+        import io
+        
+        image = Image.open(io.BytesIO(frame_file.read()))
+        frame = cv2.cvtColor(np.array(image), cv2.COLOR_RGB2BGR)
+        
+        # Process frame with situps detector
+        processed_frame = situps_detector.detect_situps(frame)
+        
+        return jsonify({'status': 'success', 'message': 'Frame processed'})
+        
+    except Exception as e:
+        return jsonify({'status': 'error', 'message': str(e)})
