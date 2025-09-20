@@ -14,7 +14,9 @@ def main():
         print("🌐 Open browser to: http://127.0.0.1:5000")
         print("🏋️ Click 'Exercise Analysis' to access situps counter")
         print("⏹️  Press Ctrl+C to stop")
-        app.run(debug=False, host='127.0.0.1', port=5000)
+        # app.run(debug=False, host='127.0.0.1', port=5000)
+        port = int(os.environ.get("PORT", 5000))
+        app.run(host="0.0.0.0", port=port)
     except ImportError as e:
         print(f"❌ Missing dependencies: {e}")
         print("Run: pip install flask opencv-python mediapipe numpy pymongo flask-cors bcrypt")

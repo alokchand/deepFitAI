@@ -58,7 +58,9 @@ def main():
     # Start Flask app
     try:
         from app import app
-        app.run(debug=False, host='0.0.0.0', port=5000)
+        # app.run(debug=False, host='0.0.0.0', port=5000)
+        port = int(os.environ.get("PORT", 5000))
+        app.run(host="0.0.0.0", port=port)
     except KeyboardInterrupt:
         print("\n👋 DeepFit stopped. Thanks for working out!")
     except Exception as e:
