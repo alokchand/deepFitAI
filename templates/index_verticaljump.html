@@ -29,7 +29,7 @@
         <div class="main-content">
             <div class="video-section">
                 <div class="video-container">
-                    <img id="video-feed" src="" alt="Camera feed will appear here" style="display: none;" 
+                    <img id="video-feed" src="" alt="Camera feed will appear here" style="display: none; width: 100%; height: 100%; object-fit: cover;" 
                          onerror="this.style.display='none'; document.getElementById('placeholder').style.display='flex';">
                     <div id="placeholder" class="video-placeholder">
                         <div class="placeholder-content">
@@ -110,8 +110,10 @@
         </div>
     </div>
 
+    <script src="{{ url_for('static', filename='js/vertical-jump-tracker.js') }}"></script>
     <script>
-        class VerticalJumpTracker {
+        // Additional page-specific functionality can go here
+        /*class VerticalJumpTracker {
             constructor() {
                 this.isRunning = false;
                 this.statsInterval = null;
