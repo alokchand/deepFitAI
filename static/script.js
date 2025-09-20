@@ -404,21 +404,38 @@ document.addEventListener('DOMContentLoaded', () => {
     new SitupsTracker();
 });
 
-// Handle page visibility changes and cleanup
+// Enhanced page visibility handling for WebView
 document.addEventListener('visibilitychange', () => {
     if (document.hidden) {
         // Page is hidden, pause the camera to save resources
         console.log('Page hidden - pausing camera');
+        if (window.webViewCameraManager && window.webViewCameraManager.stream) {
+            // Pause video tracks to save battery
+            window.webViewCameraManager.stream.getVideoTracks().forEach(track => {
+                track.enabled = false;
+            });
+        }
     } else {
         // Page is visible again
-        console.log('Page visible');
+        console.log('Page visible - resuming camera');
+        if (window.webViewCameraManager && window.webViewCameraManager.stream) {
+            // Resume video tracks
+            window.webViewCameraManager.stream.getVideoTracks().forEach(track => {
+                track.enabled = true;
+            });
+        }
     }
 });
 
-// Cleanup when page is about to be unloaded
+// Enhanced cleanup for WebView
 window.addEventListener('beforeunload', async () => {
     try {
-        // Stop camera if running
+        // Stop WebView camera
+        if (window.webViewCameraManager) {
+            await window.webViewCameraManager.stopCamera();
+        }
+        
+        // Stop server camera
         await fetch('/situp/cleanup', { method: 'POST' });
     } catch (error) {
         console.log('Cleanup error:', error);
@@ -430,3 +447,22 @@ window.addEventListener('unload', () => {
     // Final cleanup attempt
     navigator.sendBeacon('/situp/cleanup');
 });
+
+// Handle WebView-specific events
+if (window.AndroidInterface) {
+    // Android WebView interface available
+    console.log('Android WebView interface detected');
+    
+    // Handle app pause/resume
+    document.addEventListener('pause', () => {
+        console.log('App paused - stopping camera');
+        if (window.webViewCameraManager) {
+            window.webViewCameraManager.stopCamera();
+        }
+    });
+    
+    document.addEventListener('resume', () => {
+        console.log('App resumed');
+        // Camera will be restarted when user clicks start button
+    });
+}

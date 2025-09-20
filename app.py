@@ -153,10 +153,12 @@ from situp_blueprint import situp_bp
 from vertical_jump_blueprint import vertical_jump_bp
 from dumbbell_blueprint import dumbbell_bp
 from benchmark_routes import benchmark_bp
+from app_routes_webview import webview_bp
 app.register_blueprint(situp_bp, url_prefix='/situp')
 app.register_blueprint(vertical_jump_bp, url_prefix='/vertical_jump')
 app.register_blueprint(dumbbell_bp, url_prefix='/dumbbell')
 app.register_blueprint(benchmark_bp)
+app.register_blueprint(webview_bp)
 
 # Global error and request handlers
 @app.errorhandler(404)

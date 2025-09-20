@@ -2,6 +2,11 @@
 
 {% block title %}DeepFit - Create Account{% endblock %}
 
+{% block extra_css %}
+<script src="{{ url_for('static', filename='js/webview-integration.js') }}"></script>
+<script src="{{ url_for('static', filename='js/webview-photo-capture.js') }}"></script>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5 pt-5">
     <div class="row justify-content-center">
@@ -130,7 +135,7 @@
                     <div class="mt-4">
                         <label class="form-label"><i class="fas fa-camera me-2"></i> Photo Capture</label>
                         <div id="camera-container" class="glass-card p-3 rounded">
-                            <video id="video" class="w-100 rounded mb-2" autoplay playsinline></video>
+                            <video id="video" class="w-100 rounded mb-2" autoplay playsinline muted webkit-playsinline></video>
                             <canvas id="canvas" class="d-none"></canvas>
                             <img id="photo-preview" class="w-100 rounded mb-2" alt="Your captured photo" style="display: none;">
                             <input type="hidden" id="photo-data" name="photo_data">
@@ -159,74 +164,162 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/webview-camera-fix.js') }}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-        // Camera functionality
+        // Camera functionality with WebView support
         const video = document.getElementById("video");
         const canvas = document.getElementById("canvas");
         const photoPreview = document.getElementById("photo-preview");
         const captureBtn = document.getElementById("capture-btn");
         const photoData = document.getElementById("photo-data");
         const context = canvas.getContext("2d");
-        let stream;
+        let cameraManager = window.webViewCameraManager;
+        let isRetakeMode = false;
 
-        // Access the camera
+        // Enhanced camera startup for WebView
         async function startCamera() {
             try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: true });
-                video.srcObject = stream;
+                // Show loading state
+                captureBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting Camera...';
+                captureBtn.disabled = true;
+
+                // Use WebView camera manager
+                await cameraManager.startCamera(video);
+                
+                // Reset button state
+                captureBtn.innerHTML = '<i class="fas fa-camera"></i> Take Photo';
+                captureBtn.disabled = false;
+                
+                console.log('Camera started successfully');
             } catch (err) {
                 console.error("Error accessing camera:", err);
-                alert("Unable to access camera. Please ensure camera permissions are enabled.");
+                
+                // Show user-friendly error
+                const errorMsg = getErrorMessage(err);
+                showCameraError(errorMsg);
+                
+                // Reset button
+                captureBtn.innerHTML = '<i class="fas fa-camera"></i> Retry Camera';
+                captureBtn.disabled = false;
             }
+        }
+
+        function getErrorMessage(error) {
+            if (error.name === 'NotAllowedError') {
+                return 'Camera permission denied. Please enable camera access and refresh the page.';
+            } else if (error.name === 'NotFoundError') {
+                return 'No camera found on this device.';
+            } else if (error.name === 'NotSupportedError') {
+                return 'Camera not supported in this browser.';
+            } else if (error.name === 'NotReadableError') {
+                return 'Camera is being used by another application.';
+            }
+            return 'Unable to access camera. Please check permissions and try again.';
+        }
+
+        function showCameraError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'alert alert-danger mt-2';
+            errorDiv.innerHTML = `
+                <i class="fas fa-exclamation-triangle"></i> ${message}
+                <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+            `;
+            document.getElementById('camera-container').appendChild(errorDiv);
         }
 
         // Start camera when page loads
         window.addEventListener("load", startCamera);
 
-        // Capture photo when button is clicked
-        captureBtn.addEventListener("click", function() {
-            // Set canvas dimensions to match video
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-            
-            // Draw current video frame to canvas
-            context.drawImage(video, 0, 0, canvas.width, canvas.height);
-            
-            // Convert canvas to data URL (base64 image)
-            const imageDataURL = canvas.toDataURL("image/jpeg");
-            
-            // Display the captured photo
-            photoPreview.src = imageDataURL;
-            photoPreview.style.display = "block";
-            video.style.display = "none";
-            
-            // Store the image data in the hidden input
-            photoData.value = imageDataURL;
-            
-            // Update button text
-            captureBtn.innerHTML = "<i class=\"fas fa-redo\"></i> Retake Photo";
-            captureBtn.addEventListener("click", function() {
-                video.style.display = "block";
-                photoPreview.style.display = "none";
-                photoData.value = "";
-                this.innerHTML = "<i class=\"fas fa-camera\"></i> Take Photo";
-            }, { once: true });
-        });
+        // Enhanced photo capture with WebView support
+        captureBtn.addEventListener("click", async function() {
+            try {
+                if (isRetakeMode) {
+                    // Retake photo - show video again
+                    video.style.display = "block";
+                    photoPreview.style.display = "none";
+                    photoData.value = "";
+                    this.innerHTML = "<i class='fas fa-camera'></i> Take Photo";
+                    isRetakeMode = false;
+                    return;
+                }
 
-        // Clean up camera resources when leaving the page
-        window.addEventListener("beforeunload", function() {
-            if (stream) {
-                stream.getTracks().forEach(track => track.stop());
+                // Show capturing state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Capturing...';
+                this.disabled = true;
+
+                // Use WebView camera manager for photo capture
+                const photoResult = await cameraManager.capturePhoto(video, canvas);
+                
+                if (photoResult) {
+                    // Display the captured photo
+                    photoPreview.src = photoResult.dataUrl;
+                    photoPreview.style.display = "block";
+                    video.style.display = "none";
+                    
+                    // Store the image data
+                    photoData.value = photoResult.dataUrl;
+                    
+                    // Update button for retake
+                    this.innerHTML = "<i class='fas fa-redo'></i> Retake Photo";
+                    this.disabled = false;
+                    isRetakeMode = true;
+                    
+                    console.log('Photo captured successfully');
+                } else {
+                    throw new Error('Failed to capture photo');
+                }
+            } catch (error) {
+                console.error('Photo capture failed:', error);
+                
+                // Fallback to traditional method
+                try {
+                    canvas.width = video.videoWidth || 640;
+                    canvas.height = video.videoHeight || 480;
+                    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                    
+                    const imageDataURL = canvas.toDataURL("image/jpeg", 0.8);
+                    
+                    photoPreview.src = imageDataURL;
+                    photoPreview.style.display = "block";
+                    video.style.display = "none";
+                    photoData.value = imageDataURL;
+                    
+                    this.innerHTML = "<i class='fas fa-redo'></i> Retake Photo";
+                    this.disabled = false;
+                    isRetakeMode = true;
+                } catch (fallbackError) {
+                    console.error('Fallback capture also failed:', fallbackError);
+                    alert('Failed to capture photo. Please try again.');
+                    this.innerHTML = "<i class='fas fa-camera'></i> Take Photo";
+                    this.disabled = false;
+                }
             }
         });
 
-        // Form validation
+        // Enhanced cleanup for WebView
+        window.addEventListener("beforeunload", async function() {
+            try {
+                await cameraManager.stopCamera();
+            } catch (error) {
+                console.error('Error during cleanup:', error);
+            }
+        });
+
+        // Enhanced form validation
         const form = document.getElementById("signup-form");
         form.addEventListener("submit", function(e) {
             if (!photoData.value) {
                 e.preventDefault();
                 alert("Please capture your photo before continuing.");
+                return false;
+            }
+            
+            // Show submitting state
+            const submitBtn = form.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+                submitBtn.disabled = true;
             }
         });
 
@@ -234,12 +327,31 @@
         const inputs = document.querySelectorAll(".form-control");
         inputs.forEach(input => {
             input.addEventListener("focus", function() {
-                this.closest(".form-group").classList.add("animate__animated", "animate__pulse");
+                const formGroup = this.closest(".form-group") || this.closest(".form-floating");
+                if (formGroup) {
+                    formGroup.classList.add("animate__animated", "animate__pulse");
+                }
             });
             
             input.addEventListener("blur", function() {
-                this.closest(".form-group").classList.remove("animate__animated", "animate__pulse");
+                const formGroup = this.closest(".form-group") || this.closest(".form-floating");
+                if (formGroup) {
+                    formGroup.classList.remove("animate__animated", "animate__pulse");
+                }
             });
+        });
+
+        // Handle page visibility changes for WebView
+        document.addEventListener('visibilitychange', function() {
+            if (document.hidden) {
+                console.log('Page hidden - camera may pause');
+            } else {
+                console.log('Page visible - camera should resume');
+                // Restart camera if needed
+                if (!video.srcObject && !isRetakeMode) {
+                    startCamera();
+                }
+            }
         });
     });
 </script>

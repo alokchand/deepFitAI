@@ -15,7 +15,7 @@
                 </div>
                 <div class="card-body p-0">
                     <div class="video-container">
-                        <video id="videoFeed" autoplay playsinline class="img-fluid"></video>
+                        <video id="videoFeed" autoplay playsinline muted webkit-playsinline class="img-fluid"></video>
                         <div class="measurement-overlay">
                             <div class="position-guide">
                                 <div class="guide-text">Stand within the frame</div>
@@ -283,6 +283,7 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{{ url_for('static', filename='js/webview-camera-fix.js') }}"></script>
 <script src="{{ url_for('static', filename='js/notification-system.js') }}"></script>
 <script src="{{ url_for('static', filename='js/completion-monitor.js') }}"></script>
 <script>
@@ -429,15 +430,49 @@ document.addEventListener('DOMContentLoaded', function() {
 
     startButton.addEventListener('click', async function() {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-            video.srcObject = stream;
+            // Use WebView camera manager if available
+            if (window.webViewCameraManager) {
+                await window.webViewCameraManager.startCamera(video);
+            } else {
+                // Fallback to traditional method with WebView-compatible constraints
+                const constraints = {
+                    video: {
+                        width: { ideal: 1280, max: 1920 },
+                        height: { ideal: 720, max: 1080 },
+                        frameRate: { ideal: 30 },
+                        facingMode: 'user'
+                    }
+                };
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                video.srcObject = stream;
+                
+                // WebView-specific setup
+                video.setAttribute('playsinline', 'true');
+                video.setAttribute('webkit-playsinline', 'true');
+                video.muted = true;
+            }
+            
             startButton.disabled = true;
             startMeasurementProcess();
         } catch (err) {
             console.error('Error accessing camera:', err);
-            FlashMessage.show('Error accessing camera. Please check permissions.', 'danger');
+            const errorMsg = getWebViewErrorMessage(err);
+            FlashMessage.show(errorMsg, 'danger');
         }
     });
+    
+    function getWebViewErrorMessage(error) {
+        if (error.name === 'NotAllowedError') {
+            return 'Camera permission denied. Please enable camera access in your browser settings.';
+        } else if (error.name === 'NotFoundError') {
+            return 'No camera found on this device.';
+        } else if (error.name === 'NotSupportedError') {
+            return 'Camera not supported in this browser.';
+        } else if (error.name === 'NotReadableError') {
+            return 'Camera is being used by another application.';
+        }
+        return 'Error accessing camera. Please check permissions and try again.';
+    }
 
     function startMeasurementProcess() {
         isProcessing = true;
@@ -527,7 +562,10 @@ document.addEventListener('DOMContentLoaded', function() {
             updateStatus(key, false);
         });
 
-        if (video.srcObject) {
+        // Enhanced cleanup for WebView
+        if (window.webViewCameraManager) {
+            window.webViewCameraManager.stopCamera();
+        } else if (video.srcObject) {
             video.srcObject.getTracks().forEach(track => track.stop());
             video.srcObject = null;
         }

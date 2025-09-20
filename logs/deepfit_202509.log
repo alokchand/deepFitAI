@@ -1927,3 +1927,11 @@ NoneType: None
 [2025-09-20 04:04:47,783] INFO in error_logger: GET http://127.0.0.1:5000/favicon.ico
 [2025-09-20 04:04:47,783] WARNING in error_logger: Warning: Page not found: http://127.0.0.1:5000/favicon.ico
 [2025-09-20 04:04:47,784] INFO in _internal: 127.0.0.1 - - [20/Sep/2025 04:04:47] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+[2025-09-20 14:46:05,702] INFO in error_logger: Starting DeepFit application
+[2025-09-20 14:46:21,374] INFO in _internal: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on http://127.0.0.1:5000
+[2025-09-20 14:46:21,374] INFO in _internal: [33mPress CTRL+C to quit[0m
+[2025-09-20 14:46:21,377] INFO in _internal:  * Restarting with stat
+[2025-09-20 14:46:21,865] INFO in error_logger: Starting DeepFit application
+[2025-09-20 14:46:24,046] WARNING in _internal:  * Debugger is active!
+[2025-09-20 14:46:24,062] INFO in _internal:  * Debugger PIN: 679-709-569
