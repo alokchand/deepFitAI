@@ -64,7 +64,7 @@ def angle_between(a, b, c):
 def get_current_user():
     try:
         db = get_db()
-        if db and 'user_id' in session:
+        if db is not None and 'user_id' in session:
             user = db.users.find_one({'_id': ObjectId(session['user_id'])})
             if user:
                 return {'email': user.get('email', 'user@example.com')}
@@ -185,9 +185,33 @@ def start_camera():
             camera.release()
             camera = None
         
-        camera = cv2.VideoCapture(0)
-        if not camera.isOpened():
-            return jsonify({'status': 'error', 'message': 'Camera unavailable'})
+        # Try multiple camera indices
+        camera_indices = [0, 1, 2, -1]
+        camera_opened = False
+        
+        for idx in camera_indices:
+            try:
+                camera = cv2.VideoCapture(idx)
+                if camera.isOpened():
+                    ret, frame = camera.read()
+                    if ret and frame is not None:
+                        camera_opened = True
+                        break
+                    else:
+                        camera.release()
+                        camera = None
+                else:
+                    if camera:
+                        camera.release()
+                    camera = None
+            except:
+                if camera:
+                    camera.release()
+                camera = None
+                continue
+        
+        if not camera_opened:
+            return jsonify({'status': 'error', 'message': 'No camera available on server'})
         
         camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
         camera.set(cv2.CAP_PROP_FRAME_HEIGHT, 480)
@@ -232,7 +256,7 @@ def stop_camera():
         # Save to MongoDB
         try:
             db = get_db()
-            if db:
+            if db is not None:
                 user = get_current_user()
                 data = {
                     "timestamp": datetime.now().strftime('%Y%m%d_%H%M%S'),

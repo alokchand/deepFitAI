@@ -170,7 +170,7 @@ def get_current_user():
     """Get current user from MongoDB or use fallback"""
     try:
         db = get_db()
-        if db:
+        if db is not None:
             # Try session first
             if 'user_id' in session:
                 try:
@@ -347,10 +347,34 @@ def start_camera():
             session_completed = False
             session_active = False
         
-        # Initialize new camera
-        camera = cv2.VideoCapture(0)
-        if not camera.isOpened():
-            return jsonify({'status': 'error', 'message': 'Camera unavailable'})
+        # Try multiple camera indices
+        camera_indices = [0, 1, 2, -1]  # Try different camera indices
+        camera_opened = False
+        
+        for idx in camera_indices:
+            try:
+                camera = cv2.VideoCapture(idx)
+                if camera.isOpened():
+                    # Test if camera actually works
+                    ret, frame = camera.read()
+                    if ret and frame is not None:
+                        camera_opened = True
+                        break
+                    else:
+                        camera.release()
+                        camera = None
+                else:
+                    if camera:
+                        camera.release()
+                    camera = None
+            except:
+                if camera:
+                    camera.release()
+                camera = None
+                continue
+        
+        if not camera_opened:
+            return jsonify({'status': 'error', 'message': 'No camera available on server'})
         
         # Set camera properties for better performance
         camera.set(cv2.CAP_PROP_FRAME_WIDTH, 640)
